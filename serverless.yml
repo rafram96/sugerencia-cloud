@@ -1,0 +1,94 @@
+org: rafaelram
+service: security-service
+
+provider:
+  name: aws
+  runtime: python3.13
+  stage: dev
+  timeout: 30
+  iam:
+    role: arn:aws:iam::582232142172:role/LabRole
+
+package:
+  individually: true
+
+functions:
+  crearUsuario:
+    handler: Lambda_CrearUsuario.lambda_handler
+    events:
+      - http:
+          path: crearUsuario
+          method: post
+          cors: true
+
+  loginUsuario:
+    handler: Lambda_LoginUsuario.lambda_handler
+    events:
+      - http:
+          path: loginUsuario
+          method: post
+          cors: true
+
+  validarTokenAcceso:
+    handler: Lambda_ValidarTokenAcceso.lambda_handler
+    events:
+      - http:
+          path: validarToken
+          method: post
+          cors: true
+
+  crearProducto:
+    handler: LambdaCrearProducto.lambda_handler
+    events:
+      - http:
+          path: crearProducto
+          method: post
+          cors: true
+
+
+
+
+resources:
+  Resources:
+    # t_usuarios
+    UsuariosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: t_usuario
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    # t_tokens_acceso
+    TokensAccesoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: t_tokens_acceso
+        AttributeDefinitions:
+          - AttributeName: token
+            AttributeType: S
+        KeySchema:
+          - AttributeName: token
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    # t_productos
+    ProductosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: t_productos
+        AttributeDefinitions:
+          - AttributeName: tenant_id
+            AttributeType: S
+          - AttributeName: producto_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: tenant_id
+            KeyType: HASH
+          - AttributeName: producto_id
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
